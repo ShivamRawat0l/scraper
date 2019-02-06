@@ -12,14 +12,19 @@ class Scraper:
  def __init__(self):
   self.name = "Scraper"
   self.finder = Finder()
+  self.list_path = "rsl_list.csv"
+ def get_page_content(self,url):
+  page=requests.get(url)
+  return page.content
  def get_hashes(self):
-  scriptDirectory = os.path.dirname(os.path.realpath(__file__))
   hashes_to_return = []
-  with open(scriptDirectory+"/rsl_list.csv") as csvfile:
+  with open(self.list_path) as csvfile:
    csvreader= csv.reader(csvfile,delimiter=",")
    for row in csvreader:
-       page=requests.get(row[1])
-       soup= BeautifulSoup(page.content,'html.parser')
+#       print(row[1])
+       content = self.get_page_content(row[1])
+
+       soup= BeautifulSoup(content,'html.parser')
        size=row[0].split("/")[1]
        try:
            inv= soup.find(class_='tbl_productVariant')
