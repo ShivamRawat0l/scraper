@@ -6,6 +6,7 @@ from sp_script import spd
 import sys
 from os import name,system
 import time
+
 class Utils: 
     def clear(self): 
         if name == 'nt': 
@@ -14,6 +15,8 @@ class Utils:
             system('clear') 
     def minuteconvert(self,a):
         return a*60;
+
+
 class Finder :  
     def findtheid(self, sku):
         for i in spd: 
@@ -26,8 +29,9 @@ class Finder :
 
 finder = Finder()
 utility = Utils()
+
 if __name__ == "__main__"  : 
-    
+    dontrun=False
     if len(sys.argv)==1: 
         timer=10
     else :
@@ -40,7 +44,11 @@ if __name__ == "__main__"  :
             for row in csvreader:
                 page=requests.get(row[1])
                 soup= BeautifulSoup(page.content,'html.parser')
-                size=row[0].split("/")[1]
+                if(len(row[0].split("/"))==1):
+                    size="NULL"
+                else:
+                    print("THIS WAY")
+                    size=row[0].split("/")[1]
                 try:
                     inv= soup.find(class_='tbl_productVariant')
                     inventory = inv.find_all(class_='row')
@@ -53,7 +61,13 @@ if __name__ == "__main__"  :
                             else : 
                                 finder.findtheid(row[0])
                                 break
-                except: 
+                        elif i.get_text().strip()=='Udsolgt':
+                            print('No Size in inventory')
+                            break
+                        elif i.get_text()=="":
+                            finder.findtheid(row[0])
+                            break
+                except:             
                     print(size+ " not in inventory")
         time.sleep(timer)
 
