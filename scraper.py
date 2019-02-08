@@ -25,13 +25,24 @@ class Scraper:
        content = self.get_page_content(row[1])
 
        soup= BeautifulSoup(content,'html.parser')
-       size=row[0].split("/")[1]
+       if(len(row[0].split("/"))==1):
+            size="NULL"
+       else:
+            size=row[0].split("/")[1]
        try:
            inv= soup.find(class_='tbl_productVariant')
            inventory = inv.find_all(class_='row')
            inventory.pop(0)
            for i in inventory:
-               if i.get_text() == size:
+               if i.get_text().strip()=='Udsolgt':
+                    print('No Size in inventory')
+                    break
+               elif i.get_text()=="":
+                    hash_to_save = self.finder.findtheid(row[0])
+                    if(hash_to_save != None):
+                        hashes_to_return.append(hash_to_save)
+                    break
+               elif i.get_text() == size:
                    if(i.find(class_='inoutStock')):
 #                       print(size + " not in inventory")
                        break

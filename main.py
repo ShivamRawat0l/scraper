@@ -54,19 +54,19 @@ if __name__ == "__main__"  :
                     inventory = inv.find_all(class_='row')
                     inventory.pop(0)
                     for i in inventory: 
-                        if i.get_text() == size:
+                        if i.get_text().strip()=='Udsolgt':
+                            print('No Size in inventory')
+                            break
+                        elif i.get_text()=="":
+                            finder.findtheid(row[0])
+                            break
+                        elif i.get_text() == size:
                             if(i.find(class_='inoutStock')):
                                 print(size + " not in inventory")
                                 break
                             else : 
                                 finder.findtheid(row[0])
                                 break
-                        elif i.get_text().strip()=='Udsolgt':
-                            print('No Size in inventory')
-                            break
-                        elif i.get_text()=="":
-                            finder.findtheid(row[0])
-                            break
                 except:             
                     print(size+ " not in inventory")
         time.sleep(timer)
