@@ -13,16 +13,23 @@ class Scraper:
   self.name = "Scraper"
   self.finder = Finder()
   self.list_path = "rsl_list.csv"
+
+ def set_logger(self,logger):
+  self.logger = logger
  def get_page_content(self,url):
   page=requests.get(url)
   return page.content
  def get_hashes(self):
-  hashes_to_return = []
+  self.active_hashes = []
+  self.inactive_hashes = []
   with open(self.list_path) as csvfile:
    csvreader= csv.reader(csvfile,delimiter=",")
    for row in csvreader:
 #       print(row[1])
+       self.logger.wtil(row[1])
        content = self.get_page_content(row[1])
+       time.sleep(5.0)
+
 
        soup= BeautifulSoup(content,'html.parser')
        if(len(row[0].split("/"))==1):
@@ -35,12 +42,17 @@ class Scraper:
            inventory.pop(0)
            for i in inventory:
                if i.get_text().strip()=='Udsolgt':
-                    print('No Size in inventory')
+#                    self.logger.wtil('No Size in inventory')
+
+                    hash_to_save = self.finder.findtheid(row[0])
+                    if(hash_to_save != None):
+                     self.inactive_hashes.append(hash_to_save)
+
                     break
                elif i.get_text()=="":
                     hash_to_save = self.finder.findtheid(row[0])
                     if(hash_to_save != None):
-                        hashes_to_return.append(hash_to_save)
+                        self.active_hashes.append(hash_to_save)
                     break
                elif i.get_text() == size:
                    if(i.find(class_='inoutStock')):
@@ -49,11 +61,10 @@ class Scraper:
                    else :
                        hash_to_save = self.finder.findtheid(row[0])
                        if(hash_to_save != None):
-                        hashes_to_return.append(hash_to_save)
+                        self.active_hashes.append(hash_to_save)
                        break
        except:
-           print(size+ " not in inventory")
-  return hashes_to_return
+           self.logger.wtil(size+ " not in inventory")
 class Finder:
     def findtheid(self, sku):
         for i in spd:
