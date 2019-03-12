@@ -83,7 +83,14 @@ class Scraper:
            inventory = inv.find_all(class_='row')
            inventory.pop(0)
            for i in inventory:
-               if i.get_text().strip()=='Udsolgt':
+               if "input class=" in str(i):
+                    hash_to_save = self.finder.findtheid(row[0])
+                    if(hash_to_save != None):
+                        self.active_hashes.append(hash_to_save)
+                        self.active_skus.append(row[0])
+                        self.logger.wtil("AVAILABLE")
+
+               elif i.get_text().strip()=='Udsolgt':
 #                    self.logger.wtil('No Size in inventory')
 
                     hash_to_save = self.finder.findtheid_active(row[0])
