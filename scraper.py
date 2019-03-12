@@ -82,28 +82,64 @@ class Scraper:
            inv= soup.find(class_='tbl_productVariant')
            inventory = inv.find_all(class_='row')
            inventory.pop(0)
+           available = False
+           not_available = False
+           self.logger.wtil(str(url))
            for i in inventory:
+
+#               variant = inv.find_all(class_='variant')
+#               for v in inventory:
+#                self.logger.wtil(str(v.get_text()))
+
+               variant = inv.find_all(class_='col-md-4 col-sm-6')
+               for v in inventory:
+                size_from_site = str(v.get_text())
+                if("Udsolgt" in size_from_site):
+                 size_from_site = size_from_site[0:-8]
+                 available = False
+                 not_available = True
+                else:
+                 available = True
+                 not_available = False
+                if(size_from_site == size):
+                 hash_to_save = self.finder.findtheid_active(row[0])
+                 if(hash_to_save != None):
+                  if(not_available):
+                   self.inactive_hashes.append(hash_to_save)
+                   self.inactive_skus.append(row[0])
+                  if(available):
+                   self.active_hashes.append(hash_to_save)
+                   self.active_skus.append(row[0])
+                 break
+#                self.logger.wtil(size_from_site)
+
+
                if "input class=" in str(i):
                     hash_to_save = self.finder.findtheid(row[0])
                     if(hash_to_save != None):
                         self.active_hashes.append(hash_to_save)
                         self.active_skus.append(row[0])
-                        self.logger.wtil("AVAILABLE")
+                        available = True
+                        not_available = False
 
-               elif i.get_text().strip()=='Udsolgt':
+               elif 'Udsolgt' in str(i.get_text().strip()):
 #                    self.logger.wtil('No Size in inventory')
 
                     hash_to_save = self.finder.findtheid_active(row[0])
                     if(hash_to_save != None):
                      self.inactive_hashes.append(hash_to_save)
                      self.inactive_skus.append(row[0])
-
+                     available = False
+                     not_available = True
                     break
+
                elif i.get_text()=="":
                     hash_to_save = self.finder.findtheid(row[0])
                     if(hash_to_save != None):
                         self.active_hashes.append(hash_to_save)
                         self.active_skus.append(row[0])
+                        available = True
+                        not_available = False
                     break
                elif i.get_text() == size:
                    if(i.find(class_='inoutStock')):
@@ -114,7 +150,15 @@ class Scraper:
                        if(hash_to_save != None):
                         self.active_hashes.append(hash_to_save)
                         self.active_skus.append(row[0])
+                        available = True
+                        not_available = False
                        break
+           if(available and not not_available):
+            self.logger.wtil(str(row[0])+" AVAILABLE")
+           elif(not available and not_available):
+            self.logger.wtil(str(row[0])+" NOT_AVAILABLE")
+           elif(not available and not not_available):
+            self.logger.wtil("PROBLEM: "+str(row[0]))
        except:
            self.logger.wtil(size+ " not in inventory")
 class Finder:
